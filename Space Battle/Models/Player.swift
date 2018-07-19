@@ -34,7 +34,8 @@ class Player: SKSpriteNode {
         self.physicsBody?.usesPreciseCollisionDetection = false
         self.physicsBody?.categoryBitMask = CollisionCategories.Player
         self.physicsBody?.contactTestBitMask = CollisionCategories.InvaderBullet | CollisionCategories.Invader
-        self.physicsBody?.collisionBitMask = 0x0
+        self.physicsBody?.collisionBitMask = CollisionCategories.EdgeBody
+        self.physicsBody?.allowsRotation = false
         
         animate()
     }
@@ -42,6 +43,8 @@ class Player: SKSpriteNode {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
+    
+    
     
     private func animate(){
         var playerTextures:[SKTexture] = []
@@ -52,13 +55,19 @@ class Player: SKSpriteNode {
         self.run(playerAnimation)
     }
     
-    //
+    // checks whether invincible is false and, if it is, decrements the lives variable.
     func die (){
-        
+        if(invincible == false){
+            lives -= 1
+        }
     }
-    //
+    // takes the user back to the StartGameScene so they can begin a new game
     func kill(){
-        
+        invaderNum = 1
+        let gameOverScene = StartGameScene(size: self.scene!.size)
+        gameOverScene.scaleMode = self.scene!.scaleMode
+        let transitionType = SKTransition.flipHorizontal(withDuration: 0.5)
+        self.scene!.view!.presentScene(gameOverScene,transition: transitionType)
     }
     //
     func respawn(){

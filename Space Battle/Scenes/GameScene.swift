@@ -8,6 +8,7 @@
 
 import SpriteKit
 import GameplayKit
+import CoreMotion
 import UserNotifications
 
 var invaderNum = 1
@@ -16,6 +17,13 @@ struct CollisionCategories{
     static let Player: UInt32 = 0x1 << 1
     static let InvaderBullet: UInt32 = 0x1 << 2
     static let PlayerBullet: UInt32 = 0x1 << 3
+    static let EdgeBody: UInt32 = 0x1 << 4
+}
+struct CMAcceleration {
+    var x: Double
+    var y: Double
+    var z: Double
+    
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -26,10 +34,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var rightBounds = CGFloat(0)
     var invadersWhoCanFire:[Invader] = [Invader]()
     let player:Player = Player()
+    let maxLevels = 3
+    
+    let motionManager: CMMotionManager = CMMotionManager()
+    var accelerationX: CGFloat = 0.0
     
     override func didMove(to view: SKView) {
         self.physicsWorld.gravity = .zero
         self.physicsWorld.contactDelegate = self
+        self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+        self.physicsBody?.categoryBitMask = CollisionCategories.EdgeBody
         
         backgroundColor = SKColor.black
         rightBounds = self.size.width - 30
@@ -38,6 +52,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setupPlayer()
         
         invokeInvaderFire()
+        
+        setupAccelerometer()
     }
     
     func didBegin( _ contact: SKPhysicsContact) {
@@ -53,18 +69,41 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if ((firstBody.categoryBitMask & CollisionCategories.Invader != 0) &&
             (secondBody.categoryBitMask & CollisionCategories.PlayerBullet != 0)){
-            NSLog("Invader and Player Bullet Conatact")
+            if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil) {
+                return
+            }
+            
+            let invadersPerRow = invaderNum * 2 + 1
+            let theInvader = firstBody.node as! Invader
+            let newInvaderRow = theInvader.invaderRow - 1
+            let newInvaderColumn = theInvader.invaderColumn
+            if(newInvaderRow >= 1){
+                self.enumerateChildNodes(withName: "invader") { node, stop in
+                    let invader = node as! Invader
+                    if invader.invaderRow == newInvaderRow && invader.invaderColumn == newInvaderColumn{
+                        self.invadersWhoCanFire.append(invader)
+//                        stop.withMemoryRebound(to: <#T##T.Type#>, capacity: <#T##Int#>, <#T##body: (UnsafeMutablePointer<T>) throws -> Result##(UnsafeMutablePointer<T>) throws -> Result#>)
+//                        stop.memory = true
+                    }
+                }
+            }
+            let invaderIndex = findIndex(array: invadersWhoCanFire,valueToFind: firstBody.node as! Invader)
+            if(invaderIndex != nil){
+                invadersWhoCanFire.remove(at: invaderIndex!)
+            }
+            theInvader.removeFromParent()
+            secondBody.node?.removeFromParent()
+            
         }
         
         if ((firstBody.categoryBitMask & CollisionCategories.Player != 0) &&
             (secondBody.categoryBitMask & CollisionCategories.InvaderBullet != 0)) {
-            NSLog("Player and Invader Bullet Contact")
+            player.die()
         }
         
         if ((firstBody.categoryBitMask & CollisionCategories.Invader != 0) &&
             (secondBody.categoryBitMask & CollisionCategories.Player != 0)) {
-            NSLog("Invader and Player Collision Contact")
-            
+            player.kill()
         }
     }
     
@@ -141,8 +180,57 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func fireInvaderBullet(){
-        let randomInvader = invadersWhoCanFire.randomElement()
-        randomInvader.fireBullet(scene: self)
+        
+        if(invadersWhoCanFire.isEmpty){
+            invaderNum += 1
+            levelComplete()
+        }else{
+            let randomInvader = invadersWhoCanFire.randomElement()
+            randomInvader.fireBullet(scene: self)
+        }
+        
+    }
+    
+    func findIndex<T: Equatable>(array: [T], valueToFind: T) -> Int? {
+//        for (index, value) in enumerate(array) {
+        for (index, value) in array.enumerated() {
+            if value == valueToFind {
+                return index
+            }
+        }
+        return nil
+    }
+    
+    func levelComplete(){
+        if(invaderNum <= maxLevels){
+            let levelCompleteScene = LevelCompleteScene(size: size)
+            levelCompleteScene.scaleMode = scaleMode
+            let transitionType = SKTransition.flipHorizontal(withDuration: 0.5)
+            view?.presentScene(levelCompleteScene,transition: transitionType)
+        }else{
+            invaderNum = 1
+            newGame()
+        }
+    }
+    
+    func newGame(){
+        let gameOverScene = StartGameScene(size: size)
+        gameOverScene.scaleMode = scaleMode
+        let transitionType = SKTransition.flipHorizontal(withDuration: 0.5)
+        view?.presentScene(gameOverScene,transition: transitionType)
+    }
+    
+    func setupAccelerometer(){
+//        motionManager.accelerometerUpdateInterval = 0.2
+//        motionManager.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: {
+//            (accelerometerData: CMAccelerometerData!, error: NSError!) in
+//            let acceleration = accelerometerData.acceleration
+//            self.accelerationX = CGFloat(acceleration.x)
+//            } as! CMAccelerometerHandler)
+    }
+    
+    override func didSimulatePhysics() {
+        player.physicsBody?.velocity = CGVector(dx: accelerationX * 600, dy: 0)
     }
 }
 
