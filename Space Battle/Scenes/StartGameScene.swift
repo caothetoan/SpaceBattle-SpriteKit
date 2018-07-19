@@ -19,6 +19,11 @@ class StartGameScene: SKScene {
         startGameButton.position = CGPoint(x:Int(size.width/2), y:Int(size.height/2 - 100))
         startGameButton.name = "startgame"
         addChild(startGameButton)
+        
+//        let starField = SKEmitterNode(fileNamed: "StarField")
+//        starField?.position = CGPoint(x:size.width/2,y:size.height/2)
+//        starField?.zPosition = -1000
+//        addChild(starField!)
     }
     
     // invoked when one or more fingers touch down on the screen.

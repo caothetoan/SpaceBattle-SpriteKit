@@ -36,8 +36,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let player:Player = Player()
     let maxLevels = 3
     
-    let motionManager: CMMotionManager = CMMotionManager()
-    var accelerationX: CGFloat = 0.0
+    //let motionManager: CMMotionManager = CMMotionManager()
+    //var accelerationX: CGFloat = 0.0
     
     override func didMove(to view: SKView) {
         self.physicsWorld.gravity = .zero
@@ -230,7 +230,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func didSimulatePhysics() {
-        player.physicsBody?.velocity = CGVector(dx: accelerationX * 600, dy: 0)
+        // TODO uncomment check exception accelemeter
+//        player.physicsBody?.velocity = CGVector(dx: accelerationX * 600, dy: 0)
     }
 }
 
