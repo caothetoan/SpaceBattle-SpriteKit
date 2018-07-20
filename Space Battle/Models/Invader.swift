@@ -11,6 +11,7 @@ import UIKit
 class Invader: SKSpriteNode {
     var invaderRow = 0
     var invaderColumn = 0
+    private var canFire = true
     
     init() {
         let texture = SKTexture(imageNamed: "invader1")
@@ -29,9 +30,15 @@ class Invader: SKSpriteNode {
         super.init(coder: aDecoder)
     }
     
-    
-    
+    //
     func fireBullet(scene: SKScene){
-        
+        let bullet = InvaderBullet(imageName: "laser",bulletSound: nil)
+        bullet.position.x = self.position.x
+        bullet.position.y = self.position.y - self.size.height/2
+        scene.addChild(bullet)
+        let moveBulletAction = SKAction.move(to: CGPoint(x:self.position.x,y: 0 - bullet.size.height), duration: 2.0)
+        let removeBulletAction = SKAction.removeFromParent()
+        bullet.run(SKAction.sequence([moveBulletAction,removeBulletAction]))
     }
+    
 }

@@ -36,8 +36,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let player:Player = Player()
     let maxLevels = 3
     
-    //let motionManager: CMMotionManager = CMMotionManager()
-    //var accelerationX: CGFloat = 0.0
+    let motionManager: CMMotionManager = CMMotionManager()
+    var accelerationX: CGFloat = 0.0
     
     override func didMove(to view: SKView) {
         self.physicsWorld.gravity = .zero
@@ -73,7 +73,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 return
             }
             
-            let invadersPerRow = invaderNum * 2 + 1
+            //let invadersPerRow = invaderNum * 2 + 1
             let theInvader = firstBody.node as! Invader
             let newInvaderRow = theInvader.invaderRow - 1
             let newInvaderColumn = theInvader.invaderColumn
@@ -221,7 +221,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func setupAccelerometer(){
-//        motionManager.accelerometerUpdateInterval = 0.2
+        motionManager.accelerometerUpdateInterval = 0.2
 //        motionManager.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: {
 //            (accelerometerData: CMAccelerometerData!, error: NSError!) in
 //            let acceleration = accelerometerData.acceleration
@@ -231,7 +231,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func didSimulatePhysics() {
         // TODO uncomment check exception accelemeter
-//        player.physicsBody?.velocity = CGVector(dx: accelerationX * 600, dy: 0)
+        player.physicsBody?.velocity = CGVector(dx: accelerationX * 600, dy: 0)
     }
 }
 
