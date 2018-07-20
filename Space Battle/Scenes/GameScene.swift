@@ -26,7 +26,7 @@ struct CMAcceleration {
     
 }
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class GameScene: SKScene {
     
     let rowsOfInvaders = 4
     var invaderSpeed = 2
@@ -35,25 +35,34 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var invadersWhoCanFire:[Invader] = [Invader]()
     let player:Player = Player()
     let maxLevels = 3
+    var isPlayerMoved:Bool = false
     
     let motionManager: CMMotionManager = CMMotionManager()
     var accelerationX: CGFloat = 0.0
     
     override func didMove(to view: SKView) {
-        self.physicsWorld.gravity = .zero
-        self.physicsWorld.contactDelegate = self
-        self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
-        self.physicsBody?.categoryBitMask = CollisionCategories.EdgeBody
         
-        backgroundColor = SKColor.black
-        rightBounds = self.size.width - 30
+        // For Debug Use only
+        view.showsPhysics = false
+        setUpPhysics()
+        loadBackground()
         
         setupInvaders()
         setupPlayer()
         
         invokeInvaderFire()
+        invokePlayerFire()
         
         setupAccelerometer()
+    }
+    func loadBackground() {
+        backgroundColor = SKColor.black
+        rightBounds = self.size.width - 30
+        
+    }
+    
+    private func loadGameinfo() {
+        
     }
     
     func didBegin( _ contact: SKPhysicsContact) {
@@ -108,15 +117,66 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        player.fireBullet(scene: self)
+//        var pos:CGPoint!
+//        for touch in touches{
+//            pos = touch.location(in: self)
+//        }
+//
+//        if isPlayerMoved{
+//            // If player has swiped, it will not trigger this function
+//            return
+//        }
+        //player.fireBullet(scene: self)
     }
-    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            let startPoint = touch.location(in: self)
+            let endPoint = touch.previousLocation(in: self)
+            
+            // check if vine cut
+            scene?.physicsWorld.enumerateBodies(alongRayStart: startPoint, end: endPoint,
+                using: { (body, point, normal, stop) in
+                    self.checkIfVineCutWithBody(body)
+            })
+            
+            // produce some nice particles
+            showMoveParticles(touchPosition: startPoint)
+        }
+        
+    }
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         moveInvaders()
     }
+    //
+    fileprivate func checkIfVineCutWithBody(_ body: SKPhysicsBody) {
+      
+        let node = body.node!
+        
+        // if it has a name it must be a vine node
+        if let name = node.name {
+           
+            // snip the vine
+            //node.removeFromParent()
+            
+            // fade out all nodes matching name
+            enumerateChildNodes(withName: name, using: { (node, stop) in
+                let fadeAway = SKAction.fadeOut(withDuration: 0.25)
+                let removeNode = SKAction.removeFromParent()
+                let sequence = SKAction.sequence([fadeAway, removeNode])
+                node.run(sequence)
+            })
+            
+            //player.removeAllActions()
+        
+        }
+    }
     
+    fileprivate func showMoveParticles(touchPosition: CGPoint) {
+       
+        player.position = touchPosition
+    }
     //
     func setupInvaders(){
         var invaderRow: Int = 0;
@@ -169,6 +229,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     //
+    func invokePlayerFire() {
+        
+        let fireBullet = SKAction.run(){
+            self.player.fireBullet(scene: self)
+        }
+        let waitToFireBullet = SKAction.wait(forDuration: 1.5)
+        let invaderFire = SKAction.sequence([fireBullet,waitToFireBullet])
+        let repeatForeverAction = SKAction.repeatForever(invaderFire)
+        run(repeatForeverAction)
+    }
+    //
     func invokeInvaderFire(){
         let fireBullet = SKAction.run(){
             self.fireInvaderBullet()
@@ -207,7 +278,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             levelCompleteScene.scaleMode = scaleMode
             let transitionType = SKTransition.flipHorizontal(withDuration: 0.5)
             view?.presentScene(levelCompleteScene,transition: transitionType)
-        }else{
+        } else {
             invaderNum = 1
             newGame()
         }
@@ -220,19 +291,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         view?.presentScene(gameOverScene,transition: transitionType)
     }
     
-    func setupAccelerometer(){
-        motionManager.accelerometerUpdateInterval = 0.2
-//        motionManager.startAccelerometerUpdates(to: OperationQueue.current!, withHandler: {
-//            (accelerometerData: CMAccelerometerData!, error: NSError!) in
-//            let acceleration = accelerometerData.acceleration
-//            self.accelerationX = CGFloat(acceleration.x)
-//            } as! CMAccelerometerHandler)
-    }
-    
-    override func didSimulatePhysics() {
-        // TODO uncomment check exception accelemeter
-        player.physicsBody?.velocity = CGVector(dx: accelerationX * 600, dy: 0)
-    }
 }
 
 extension GameScene {

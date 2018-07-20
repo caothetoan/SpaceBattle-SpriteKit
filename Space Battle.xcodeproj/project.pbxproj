@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		523EA91F21017911002D3BA9 /* GameScenePhysics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523EA91E21017911002D3BA9 /* GameScenePhysics.swift */; };
 		524B0BED21009B210022A469 /* CGPointExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B0BEC21009B210022A469 /* CGPointExtension.swift */; };
 		524B0BEF2100A0510022A469 /* LevelCompleteScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B0BEE2100A0510022A469 /* LevelCompleteScene.swift */; };
 		524B0BF22100A47C0022A469 /* StarField.scnp in Resources */ = {isa = PBXBuildFile; fileRef = 524B0BF02100A47C0022A469 /* StarField.scnp */; };
@@ -60,6 +61,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		523EA91E21017911002D3BA9 /* GameScenePhysics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScenePhysics.swift; sourceTree = "<group>"; };
 		524B0BEC21009B210022A469 /* CGPointExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtension.swift; sourceTree = "<group>"; };
 		524B0BEE2100A0510022A469 /* LevelCompleteScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelCompleteScene.swift; sourceTree = "<group>"; };
 		524B0BF02100A47C0022A469 /* StarField.scnp */ = {isa = PBXFileReference; lastKnownFileType = file.scp; path = StarField.scnp; sourceTree = "<group>"; };
@@ -196,6 +198,7 @@
 			isa = PBXGroup;
 			children = (
 				52FFE02120FD894600BCDD76 /* GameScene.swift */,
+				523EA91E21017911002D3BA9 /* GameScenePhysics.swift */,
 				52FFE04F20FD8EED00BCDD76 /* StartGameScene.swift */,
 				524B0BEE2100A0510022A469 /* LevelCompleteScene.swift */,
 			);
@@ -390,6 +393,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				523EA91F21017911002D3BA9 /* GameScenePhysics.swift in Sources */,
 				52F78CB82100900000EA1ED3 /* PlayerBullet.swift in Sources */,
 				52F78CBB2100939B00EA1ED3 /* ArrayExtensions.swift in Sources */,
 				52FFE02220FD894600BCDD76 /* GameScene.swift in Sources */,
